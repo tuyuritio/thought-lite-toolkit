@@ -16,6 +16,7 @@ catalog:
   remark-parse: ^11.0.0
   remark-rehype: ^11.1.2
   remark-stringify: ^11.0.0
+  shiki: ^3.22.0
   unified: ^11.0.5
   unist-builder: ^4.0.0
   unist-util-visit: ^5.1.0

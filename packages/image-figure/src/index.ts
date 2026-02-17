@@ -1,4 +1,4 @@
-import type { Plugin } from "unified";
+import type { Plugin, Transformer } from "unified";
 import { visit } from "unist-util-visit";
 import type { Root } from "hast";
 import { h } from "hastscript";
@@ -25,7 +25,7 @@ import { h } from "hastscript";
  * - The paragraph must be at the root level (no parent or parent is root)
  */
 const plugin: Plugin<[], Root> = () => {
-	return (tree: Root) => {
+	const transformer: Transformer<Root> = tree => {
 		// Visit all element nodes in the HTML AST
 		visit(tree, "element", (node, _index, parent) => {
 			// Check if this is a paragraph with a single image child at root level
@@ -48,6 +48,8 @@ const plugin: Plugin<[], Root> = () => {
 			}
 		});
 	};
+
+	return transformer;
 };
 
 export default plugin;

@@ -1,0 +1,33 @@
+{
+	"name": "@tuyuritio/shiki-code-copy",
+	"version": "0.0.0",
+	"description": "Shiki plugin to add copy button to code blocks.",
+	"license": "GPL-3.0-or-later",
+	"author": "tuyuritio",
+	"homepage": "https://github.com/tuyuritio/thought-lite-toolkit/tree/main/packages/code-copy#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tuyuritio/thought-lite-toolkit",
+		"directory": "packages/code-copy"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"test": "vitest run",
+		"dev": "vitest",
+		"build": "tsup src/index.ts --format esm --dts"
+	},
+	"devDependencies": {
+		"shiki": "catalog:"
+	},
+	"peerDependencies": {
+		"shiki": "catalog:"
+	},
+	"dependencies": {
+		"hastscript": "catalog:"
+	}
+}
