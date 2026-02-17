@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/remark-ruby",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Remark plugin to support ruby annotations.",
 	"license": "GPL-3.0-or-later",
 	"author": "tuyuritio",
