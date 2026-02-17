@@ -91,13 +91,10 @@ const plugin: Plugin<[], Root> = () => {
 					bases.forEach((char, index) => {
 						children.push(u("text", char));
 
-						// Only add ruby annotation if the reading is not empty
-						const reading = readings[index];
-						if (reading.trim()) {
-							children.push({ type: "rp", children: [u("text", "(")], data: { hName: "rp" } });
-							children.push({ type: "rt", children: [u("text", readings[index])], data: { hName: "rt" } });
-							children.push({ type: "rp", children: [u("text", ")")], data: { hName: "rp" } });
-						}
+						const reading = readings[index].trim();
+						if (reading) children.push({ type: "rp", children: [u("text", "(")], data: { hName: "rp" } });
+						children.push({ type: "rt", children: [u("text", reading)], data: { hName: "rt" } });
+						if (reading) children.push({ type: "rp", children: [u("text", ")")], data: { hName: "rp" } });
 					});
 				} else {
 					// Group ruby mode

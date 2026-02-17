@@ -35,7 +35,7 @@ describe("remark-ruby", () => {
 		const output = await process(input);
 
 		expect(output).toBe(
-			"<p><ruby>振<rp>(</rp><rt>ふ</rt><rp>)</rp>り仮<rp>(</rp><rt>が</rt><rp>)</rp>名<rp>(</rp><rt>な</rt><rp>)</rp></ruby></p>"
+			"<p><ruby>振<rp>(</rp><rt>ふ</rt><rp>)</rp>り<rt></rt>仮<rp>(</rp><rt>が</rt><rp>)</rp>名<rp>(</rp><rt>な</rt><rp>)</rp></ruby></p>"
 		);
 	});
 
