@@ -1,0 +1,42 @@
+{
+	"name": "@tuyuritio/remark-spoiler",
+	"version": "0.0.0",
+	"description": "Remark plugin to process spoiler syntax.",
+	"license": "GPL-3.0-or-later",
+	"author": "tuyuritio",
+	"homepage": "https://github.com/tuyuritio/thought-lite-toolkit/tree/main/packages/spoiler#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tuyuritio/thought-lite-toolkit",
+		"directory": "packages/spoiler"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"test": "vitest run",
+		"dev": "vitest",
+		"build": "tsup src/index.ts --format esm --dts"
+	},
+	"devDependencies": {
+		"@types/mdast": "catalog:",
+		"@types/unist": "catalog:",
+		"rehype-stringify": "catalog:",
+		"remark-parse": "catalog:",
+		"remark-rehype": "catalog:",
+		"remark-stringify": "catalog:",
+		"unified": "catalog:"
+	},
+	"peerDependencies": {
+		"unified": "catalog:"
+	},
+	"dependencies": {
+		"micromark-util-chunked": "^2.0.1",
+		"micromark-util-classify-character": "^2.0.1",
+		"micromark-util-resolve-all": "^2.0.1",
+		"micromark-util-types": "catalog:"
+	}
+}
