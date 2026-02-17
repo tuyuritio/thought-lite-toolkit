@@ -1,0 +1,36 @@
+{
+	"name": "@tuyuritio/rehype-table-wrapper",
+	"version": "0.0.0",
+	"description": "Rehype plugin to wrap tables in a div for responsive styling.",
+	"license": "GPL-3.0-or-later",
+	"author": "tuyuritio",
+	"homepage": "https://github.com/tuyuritio/thought-lite-toolkit/tree/main/packages/table-wrapper#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tuyuritio/thought-lite-toolkit",
+		"directory": "packages/table-wrapper"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"test": "vitest run",
+		"dev": "vitest",
+		"build": "tsup src/index.ts --format esm --dts"
+	},
+	"devDependencies": {
+		"@types/hast": "catalog:",
+		"rehype-parse": "catalog:",
+		"rehype-stringify": "catalog:",
+		"unified": "catalog:"
+	},
+	"peerDependencies": {
+		"unified": "catalog:"
+	},
+	"dependencies": {
+		"unist-util-visit": "catalog:"
+	}
+}

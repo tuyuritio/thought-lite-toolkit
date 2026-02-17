@@ -5,13 +5,14 @@ A collection of extensions designed for [`astro-theme-thought-lite`](https://git
 ## Extensions
 
 | Package | Description |
-| - | - |
+|:- |:- |
 | [`@tuyuritio/remark-ruby`](packages/ruby) | Remark plugin to support ruby annotations. |
+| [`@tuyuritio/rehype-table-wrapper`](packages/table-wrapper) | Rehype plugin to wrap tables in a div for responsive styling. |
 
 ## Scripts
 
 | Command | Action |
-| - | - |
+|:- |:- |
 | `pnpm dev` | Start Vitest in watch mode. |
 | `pnpm test` | Run Vitest once. |
 | `pnpm build` | Build packages via Turbo. |
