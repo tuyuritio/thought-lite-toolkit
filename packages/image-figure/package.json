@@ -1,0 +1,42 @@
+{
+	"name": "@tuyuritio/rehype-image-figure",
+	"version": "1.0.0",
+	"description": "Rehype plugin to transform images into figures with captions.",
+	"license": "GPL-3.0-or-later",
+	"author": "tuyuritio",
+	"homepage": "https://github.com/tuyuritio/thought-lite-toolkit/tree/main/packages/image-figure#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tuyuritio/thought-lite-toolkit",
+		"directory": "packages/image-figure"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"test": "vitest run",
+		"dev": "vitest",
+		"build": "tsup src/index.ts --format esm --dts"
+	},
+	"devDependencies": {
+		"@types/hast": "catalog:",
+		"@types/mdast": "catalog:",
+		"@types/unist": "catalog:",
+		"rehype-parse": "catalog:",
+		"rehype-stringify": "catalog:",
+		"remark-parse": "catalog:",
+		"remark-rehype": "catalog:",
+		"unified": "catalog:"
+	},
+	"peerDependencies": {
+    "unified": "catalog:"
+	},
+	"dependencies": {
+    "hastscript": "catalog:",
+		"unist-builder": "catalog:",
+		"unist-util-visit": "catalog:"
+	}
+}

@@ -18,6 +18,9 @@ catalogs:
     '@types/unist':
       specifier: ^3.0.3
       version: 3.0.3
+    hastscript:
+      specifier: ^9.0.1
+      version: 9.0.1
     mdast-util-find-and-replace:
       specifier: ^3.0.2
       version: 3.0.2
@@ -112,6 +115,43 @@ importers:
       '@types/unist':
         specifier: 'catalog:'
         version: 3.0.3
+      rehype-stringify:
+        specifier: 'catalog:'
+        version: 10.0.1
+      remark-parse:
+        specifier: 'catalog:'
+        version: 11.0.0
+      remark-rehype:
+        specifier: 'catalog:'
+        version: 11.1.2
+      unified:
+        specifier: 'catalog:'
+        version: 11.0.5
+
+  packages/image-figure:
+    dependencies:
+      hastscript:
+        specifier: 'catalog:'
+        version: 9.0.1
+      unist-builder:
+        specifier: 'catalog:'
+        version: 4.0.0
+      unist-util-visit:
+        specifier: 'catalog:'
+        version: 5.1.0
+    devDependencies:
+      '@types/hast':
+        specifier: 'catalog:'
+        version: 3.0.4
+      '@types/mdast':
+        specifier: 'catalog:'
+        version: 4.0.4
+      '@types/unist':
+        specifier: 'catalog:'
+        version: 3.0.3
+      rehype-parse:
+        specifier: 'catalog:'
+        version: 9.0.1
       rehype-stringify:
         specifier: 'catalog:'
         version: 10.0.1
