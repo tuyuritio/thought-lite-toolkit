@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/remark-attribute",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Remark plugin to inject HTML attributes.",
 	"license": "GPL-3.0-or-later",
 	"author": "tuyuritio",
@@ -25,9 +25,9 @@
 		"unist-util-visit": "catalog:"
 	},
 	"devDependencies": {
-    "@types/hast": "catalog:",
+		"@types/hast": "catalog:",
 		"@types/mdast": "catalog:",
-    "@types/unist": "catalog:",
+		"@types/unist": "catalog:",
 		"rehype-stringify": "catalog:",
 		"remark-parse": "catalog:",
 		"remark-rehype": "catalog:",
