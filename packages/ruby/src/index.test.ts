@@ -5,13 +5,13 @@ import rehypeStringify from "rehype-stringify";
 import remarkRuby from ".";
 
 /**
- * Helper function to process markdown content with the remark abbreviation plugin.
+ * Helper function to process markdown content with the remark-ruby plugin.
  *
- * @param content - The markdown content to process.
+ * @param markdown - The markdown content to process.
  * @returns The processed markdown as a string.
  */
-async function process(content: string) {
-	const result = await unified().use(remarkParse).use(remarkRuby).use(remarkRehype).use(rehypeStringify).process(content);
+async function process(markdown: string) {
+	const result = await unified().use(remarkParse).use(remarkRuby).use(remarkRehype).use(rehypeStringify).process(markdown);
 	return result.toString();
 }
 
