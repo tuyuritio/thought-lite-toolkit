@@ -94,6 +94,37 @@ importers:
         specifier: 'catalog:'
         version: 4.0.18(@types/node@25.2.3)
 
+  packages/github-alert:
+    dependencies:
+      unist-builder:
+        specifier: 'catalog:'
+        version: 4.0.0
+      unist-util-visit:
+        specifier: 'catalog:'
+        version: 5.1.0
+    devDependencies:
+      '@types/hast':
+        specifier: 'catalog:'
+        version: 3.0.4
+      '@types/mdast':
+        specifier: 'catalog:'
+        version: 4.0.4
+      '@types/unist':
+        specifier: 'catalog:'
+        version: 3.0.3
+      rehype-stringify:
+        specifier: 'catalog:'
+        version: 10.0.1
+      remark-parse:
+        specifier: 'catalog:'
+        version: 11.0.0
+      remark-rehype:
+        specifier: 'catalog:'
+        version: 11.1.2
+      unified:
+        specifier: 'catalog:'
+        version: 11.0.5
+
   packages/link-card:
     dependencies:
       unist-builder:

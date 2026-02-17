@@ -15,7 +15,7 @@ async function process(markdown: string) {
 	return result.toString();
 }
 
-describe("`remark-ruby` Plugin", () => {
+describe("remark-ruby", () => {
 	it("should convert basic group ruby syntax", async () => {
 		const input = "{漢字}(かんじ)";
 		const output = await process(input);
