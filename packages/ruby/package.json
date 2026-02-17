@@ -1,0 +1,37 @@
+{
+	"name": "@tuyuritio/remark-ruby",
+	"version": "0.0.0",
+	"description": "Remark plugin to support ruby annotations.",
+	"license": "GPL-3.0-or-later",
+	"author": "tuyuritio",
+	"homepage": "https://github.com/tuyuritio/thought-lite-toolkit/tree/main/packages/ruby#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tuyuritio/thought-lite-toolkit",
+		"directory": "packages/ruby"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": ["dist"],
+	"scripts": {
+		"test": "vitest run",
+		"dev": "vitest",
+		"build": "tsup src/index.ts --format esm --dts"
+	},
+	"devDependencies": {
+		"@types/mdast": "catalog:",
+		"@types/unist": "catalog:",
+		"rehype-stringify": "catalog:",
+		"remark-parse": "catalog:",
+		"remark-rehype": "catalog:",
+		"unified": "catalog:"
+	},
+	"peerDependencies": {
+		"unified": "catalog:"
+	},
+	"dependencies": {
+		"mdast-util-find-and-replace": "catalog:",
+		"unist-builder": "catalog:"
+	}
+}
