@@ -1,5 +1,11 @@
 # @tuyuritio/rehype-table-wrapper
 
+## 1.0.1
+
+### Patch Changes
+
+- 84675f0: Enforce required className
+
 ## 1.0.0
 
 ### Major Changes
