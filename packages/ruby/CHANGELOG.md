@@ -1,5 +1,11 @@
 # @tuyuritio/remark-ruby
 
+## 1.0.1
+
+### Patch Changes
+
+- ec0a520: Resolve catalog protocol.
+
 ## 1.0.0
 
 ### Major Changes
