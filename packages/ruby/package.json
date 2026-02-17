@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/remark-ruby",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Remark plugin to support ruby annotations.",
 	"license": "GPL-3.0-or-later",
 	"author": "tuyuritio",
@@ -13,7 +13,9 @@
 	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"test": "vitest run",
 		"dev": "vitest",
