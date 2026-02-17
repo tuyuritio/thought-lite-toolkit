@@ -1,5 +1,11 @@
 # @tuyuritio/remark-ruby
 
+## 1.0.2
+
+### Patch Changes
+
+- 3dd3960: Ensure ruby alignment by balancing rt and rp nodes.
+
 ## 1.0.1
 
 ### Patch Changes
