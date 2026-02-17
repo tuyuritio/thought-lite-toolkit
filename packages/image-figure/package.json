@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/rehype-image-figure",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Rehype plugin to transform images into figures with captions.",
 	"license": "GPL-3.0-or-later",
 	"author": "tuyuritio",
@@ -32,10 +32,10 @@
 		"unified": "catalog:"
 	},
 	"peerDependencies": {
-    "unified": "catalog:"
+		"unified": "catalog:"
 	},
 	"dependencies": {
-    "hastscript": "catalog:",
+		"hastscript": "catalog:",
 		"unist-builder": "catalog:",
 		"unist-util-visit": "catalog:"
 	}

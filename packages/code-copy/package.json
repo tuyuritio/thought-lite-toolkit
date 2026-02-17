@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/shiki-code-copy",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Shiki plugin to add copy button to code blocks.",
 	"license": "GPL-3.0-or-later",
 	"author": "tuyuritio",
