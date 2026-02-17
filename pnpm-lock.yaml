@@ -54,9 +54,6 @@ catalogs:
     unist-util-visit:
       specifier: ^5.1.0
       version: 5.1.0
-    vitest:
-      specifier: ^4.0.18
-      version: 4.0.18
 
 importers:
 
@@ -83,6 +80,12 @@ importers:
 
   packages/abbreviation:
     dependencies:
+      '@types/unist':
+        specifier: 'catalog:'
+        version: 3.0.3
+      mdast-util-find-and-replace:
+        specifier: 'catalog:'
+        version: 3.0.2
       unist-util-visit:
         specifier: 'catalog:'
         version: 5.1.0
@@ -90,18 +93,18 @@ importers:
       '@types/mdast':
         specifier: 'catalog:'
         version: 4.0.4
+      rehype-stringify:
+        specifier: 'catalog:'
+        version: 10.0.1
       remark-parse:
         specifier: 'catalog:'
         version: 11.0.0
-      remark-stringify:
+      remark-rehype:
         specifier: 'catalog:'
-        version: 11.0.0
+        version: 11.1.2
       unified:
         specifier: 'catalog:'
         version: 11.0.5
-      vitest:
-        specifier: 'catalog:'
-        version: 4.0.18(@types/node@25.2.3)
 
   packages/code-copy:
     dependencies:

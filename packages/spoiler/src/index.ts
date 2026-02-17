@@ -1,7 +1,7 @@
-import type { Plugin } from "unified";
 import type { Root } from "mdast";
-import { spoilerSyntax } from "./micromark-extension-spoiler";
+import type { Plugin } from "unified";
 import { spoilerFromMarkdown, spoilerToMarkdown } from "./mdast-util-spoiler";
+import { spoilerSyntax } from "./micromark-extension-spoiler";
 
 /**
  * Remark plugin to support spoiler syntax.

@@ -1,7 +1,7 @@
-import type { Code, Construct, Event, Extension, Resolver, State, Token, Tokenizer, TokenizeContext } from "micromark-util-types";
 import { splice } from "micromark-util-chunked";
 import { classifyCharacter } from "micromark-util-classify-character";
 import { resolveAll } from "micromark-util-resolve-all";
+import type { Code, Construct, Event, Extension, Resolver, State, Token, TokenizeContext, Tokenizer } from "micromark-util-types";
 
 declare module "micromark-util-types" {
 	interface TokenTypeMap {

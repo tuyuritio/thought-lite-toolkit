@@ -1,8 +1,8 @@
+import type { Data, PhrasingContent, Root } from "mdast";
+import { findAndReplace } from "mdast-util-find-and-replace";
 import type { Plugin, Transformer } from "unified";
 import type { Parent } from "unist";
 import { u } from "unist-builder";
-import type { Data, PhrasingContent, Root } from "mdast";
-import { findAndReplace } from "mdast-util-find-and-replace";
 
 /** Data for ruby parenthesis (`rp`) element */
 interface RubyParenthesisData extends Data {

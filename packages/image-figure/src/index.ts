@@ -1,7 +1,7 @@
-import type { Plugin, Transformer } from "unified";
-import { visit } from "unist-util-visit";
 import type { Root } from "hast";
 import { h } from "hastscript";
+import type { Plugin, Transformer } from "unified";
+import { visit } from "unist-util-visit";
 
 /**
  * Rehype plugin to convert standalone images into figure elements with captions.

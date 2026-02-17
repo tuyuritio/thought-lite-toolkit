@@ -1,8 +1,8 @@
-import { unified } from "unified";
+import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
-import rehypeStringify from "rehype-stringify";
 import remarkStringify from "remark-stringify";
+import { unified } from "unified";
 import remarkSpoiler from ".";
 
 /**

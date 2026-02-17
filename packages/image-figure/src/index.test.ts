@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { unified } from "unified";
 import rehypeParse from "rehype-parse";
 import rehypeStringify from "rehype-stringify";
+import { unified } from "unified";
+import { describe, expect, it } from "vitest";
 import rehypeImageFigure from ".";
 
 /**

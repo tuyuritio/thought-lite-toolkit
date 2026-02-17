@@ -1,6 +1,7 @@
 // Import ShikiTransformer type for syntax highlighting transformations
-import type { ShikiTransformer } from "shiki";
+
 import { h } from "hastscript";
+import type { ShikiTransformer } from "shiki";
 
 interface Options {
 	/**

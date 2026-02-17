@@ -1,8 +1,8 @@
-import { visit } from "unist-util-visit";
-import type { Plugin, Transformer } from "unified";
-import type { Root } from "mdast";
-import { u } from "unist-builder";
 import type { Properties } from "hast";
+import type { Root } from "mdast";
+import type { Plugin, Transformer } from "unified";
+import { u } from "unist-builder";
+import { visit } from "unist-util-visit";
 
 interface Options {
 	/**

@@ -1,6 +1,6 @@
-import { visit } from "unist-util-visit";
-import type { Root, Element } from "hast";
+import type { Element, Root } from "hast";
 import type { Plugin, Transformer } from "unified";
+import { SKIP, visit } from "unist-util-visit";
 
 interface Options {
 	/**
@@ -33,7 +33,7 @@ const plugin: Plugin<[Options?], Root> = ({ className } = { className: "table-wr
 
 				parent.children[index] = wrapper;
 
-				return "skip";
+				return SKIP;
 			}
 		});
 	};
