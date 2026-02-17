@@ -10,7 +10,7 @@ import rehypeTableWrapper from ".";
  * @param options - Optional configuration for the plugin.
  * @returns The processed HTML as a string.
  */
-const process = async (html: string, options = {}) => {
+const process = async (html: string, options?: any) => {
 	const result = await unified().use(rehypeParse, { fragment: true }).use(rehypeTableWrapper, options).use(rehypeStringify).process(html);
 	return result.toString();
 };

@@ -7,7 +7,7 @@ interface Options {
 	 * The CSS class name to apply to the wrapper div.
 	 * @default "table-wrapper"
 	 */
-	className?: string;
+	className: string;
 }
 
 /**
@@ -20,9 +20,7 @@ interface Options {
  *           <table>...</table>
  *         </div>
  */
-const plugin: Plugin<[Options?], Root> = (options = {}) => {
-	const className = options.className || "table-wrapper";
-
+const plugin: Plugin<[Options?], Root> = ({ className } = { className: "table-wrapper" }) => {
 	const transformer: Transformer<Root> = tree => {
 		visit(tree, "element", (node, index, parent) => {
 			if (node.tagName === "table" && parent && typeof index === "number" && (parent as Element).tagName !== "div") {
