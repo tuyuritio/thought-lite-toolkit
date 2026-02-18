@@ -11,6 +11,9 @@ A collection of extensions designed for [`astro-theme-thought-lite`](https://git
 | [`@tuyuritio/remark-github-alert`](packages/github-alert) | Remark plugin to convert GitHub-style alert syntax in blockquotes into styled divs with icons. |
 | [`@tuyuritio/rehype-image-figure`](packages/image-figure) | Rehype plugin to transform standalone images into semantic `<figure>` elements with `<figcaption>`. |
 | [`@tuyuritio/shiki-code-copy`](packages/code-copy) | Shiki transformer to add copy-to-clipboard buttons to code blocks with customizable feedback duration. |
+| [`@tuyuritio/remark-spoiler`](packages/spoiler) | Remark plugin to process spoiler syntax. |
+| [`@tuyuritio/remark-abbreviation`](packages/abbreviation) | Remark plugin to process abbreviations. |
+| [`@tuyuritio/remark-attribute`](packages/attribute) | Remark plugin to inject HTML attributes. |
 
 ## Scripts
 
@@ -18,8 +21,8 @@ A collection of extensions designed for [`astro-theme-thought-lite`](https://git
 |:- |:- |
 | `pnpm dev` | Start Vitest in watch mode. |
 | `pnpm test` | Run Vitest once. |
-| `pnpm build` | Build packages via Turbo. |
-| `pnpm lint` | Check code via Biome. |
+| `pnpm build` | Build packages. |
+| `pnpm lint` | Check code. |
 
 ## License
 
