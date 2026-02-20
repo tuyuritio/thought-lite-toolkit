@@ -132,6 +132,14 @@ describe("remark-spoiler", () => {
 		expect(output).toContain('<span class="spoiler">two</span>');
 	});
 
+	it("should handle spoiler opening adjacent to CJK character followed by punctuation", async () => {
+		// CJK-friendly: a CJK character before !! allows it to open even when the next character is a punctuation mark (e.g. '(' or '（')
+		const input = "这是一句!!(内容)!!";
+		const output = await process(input);
+
+		expect(output).toBe('<p>这是一句<span class="spoiler">(内容)</span></p>');
+	});
+
 	it("should roundtrip spoiler through remark-stringify", async () => {
 		const input = "!!spoiler text!!";
 		const output = await roundtrip(input);

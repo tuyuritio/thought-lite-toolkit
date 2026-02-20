@@ -1,5 +1,17 @@
+import {
+	classifyCharacter,
+	classifyPrecedingCharacter,
+	isCjk,
+	isCodeHighSurrogate,
+	isCodeLowSurrogate,
+	isIvs,
+	isNonCjkPunctuation,
+	isUnicodeWhitespace,
+	TwoPreviousCode,
+	tryGetGenuineNextCode,
+	tryGetGenuinePreviousCode
+} from "micromark-extension-cjk-friendly-util";
 import { splice } from "micromark-util-chunked";
-import { classifyCharacter } from "micromark-util-classify-character";
 import { resolveAll } from "micromark-util-resolve-all";
 import type { Code, Construct, Event, Extension, Resolver, State, Token, TokenizeContext, Tokenizer } from "micromark-util-types";
 
@@ -21,7 +33,15 @@ declare module "micromark-util-types" {
  */
 export function spoilerSyntax(): Extension {
 	const tokenizer: Tokenizer = function (effects, ok, nok) {
-		const previous = this.previous;
+		const { now, sliceSerialize, previous: tentativePrevious } = this;
+		const previous = isCodeLowSurrogate(tentativePrevious)
+			? tryGetGenuinePreviousCode(tentativePrevious, now(), sliceSerialize)
+			: tentativePrevious;
+
+		const before = classifyCharacter(previous);
+		const twoPrevious = new TwoPreviousCode(previous!, now(), sliceSerialize);
+		const beforePrimary = classifyPrecedingCharacter(before, twoPrevious.value.bind(twoPrevious), previous);
+
 		const events = this.events;
 		let size = 0;
 
@@ -46,19 +66,25 @@ export function spoilerSyntax(): Extension {
 			// Require exactly 2 exclamation marks
 			if (size !== 2) return nok(code);
 
-			const before = classifyCharacter(previous);
-			const after = classifyCharacter(code);
-
-			// Left-flanking (can open): not followed by whitespace, and either
-			// not followed by punctuation or preceded by whitespace/punctuation.
-			const open = !!(!after || (after === 2 && before));
-			// Right-flanking (can close): not preceded by whitespace, and either
-			// not preceded by punctuation or followed by whitespace/punctuation.
-			const close = !!(!before || (before === 2 && after));
-
 			const token = effects.exit("spoilerSequenceTemporary");
-			token._open = open;
-			token._close = close;
+
+			// Resolve surrogate pairs for the character after the sequence
+			const next = isCodeHighSurrogate(code) ? tryGetGenuineNextCode(code, now(), sliceSerialize) : code;
+			const after = classifyCharacter(next);
+
+			const beforeNonCjkPunctuation = isNonCjkPunctuation(beforePrimary);
+			const beforeSpaceOrNonCjkPunctuation = beforeNonCjkPunctuation || isUnicodeWhitespace(beforePrimary);
+			const afterNonCjkPunctuation = isNonCjkPunctuation(after);
+			const afterSpaceOrNonCjkPunctuation = afterNonCjkPunctuation || isUnicodeWhitespace(after);
+			// CJK character or IVS preceding the opening marker lets it open even before punctuation
+			const beforeCjkOrIvs = isCjk(beforePrimary) || isIvs(before);
+
+			// Left-flanking (can open): not followed by space/non-CJK-punctuation, or
+			// followed by non-CJK-punctuation AND preceded by space/non-CJK-punctuation/CJK.
+			token._open = !afterSpaceOrNonCjkPunctuation || (afterNonCjkPunctuation && (beforeSpaceOrNonCjkPunctuation || beforeCjkOrIvs));
+			// Right-flanking (can close): not preceded by space/non-CJK-punctuation, or
+			// preceded by non-CJK-punctuation AND followed by space/non-CJK-punctuation/CJK.
+			token._close = !beforeSpaceOrNonCjkPunctuation || (beforeNonCjkPunctuation && (afterSpaceOrNonCjkPunctuation || isCjk(after)));
 
 			return ok(code);
 		}
