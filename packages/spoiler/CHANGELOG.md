@@ -1,5 +1,11 @@
 # @tuyuritio/remark-spoiler
 
+## 0.0.2
+
+### Patch Changes
+
+- 16844cb: Enhance CJK support.
+
 ## 0.0.1
 
 ### Patch Changes
