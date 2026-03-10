@@ -1,6 +1,6 @@
-import { visit, SKIP } from "unist-util-visit";
-import type { Root, RootContent, Paragraph, PhrasingContent, Parent } from "mdast";
-import type { InlineMath, Math as ASTMath } from "mdast-util-math";
+import type { Paragraph, Parent, PhrasingContent, Root, RootContent } from "mdast";
+import type { Math as ASTMath, InlineMath } from "mdast-util-math";
+import { SKIP, visit } from "unist-util-visit";
 
 interface Options {
 	enabled?: boolean;
