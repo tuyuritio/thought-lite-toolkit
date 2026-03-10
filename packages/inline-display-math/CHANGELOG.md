@@ -2,9 +2,9 @@
 
 ## 1.0.1
 
-### Refactor
+1767229: Complete rewrite of the traversal logic.
 
-Complete rewrite of the traversal logic.
+### Refactor
 
 - visits `paragraph`
 - reconstructs blocks using a buffer
@@ -17,7 +17,7 @@ Complete rewrite of the traversal logic.
 
 ## 1.0.0
 
-Initial release.
+5bbf31e: Initial release.
 
 ### Features
 
