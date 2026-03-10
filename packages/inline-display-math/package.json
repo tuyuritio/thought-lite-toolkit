@@ -22,7 +22,7 @@
 		"build": "tsup src/index.ts --format esm --dts"
 	},
 	"dependencies": {
-		"unist-util-visit-parents": "catalog:"
+		"unist-util-visit": "catalog:"
 	},
 	"devDependencies": {
 		"@types/mdast": "catalog:",

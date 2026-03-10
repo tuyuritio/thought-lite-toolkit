@@ -69,18 +69,28 @@ Display math, however, must be represented as a `math` block node.
 
 This plugin rewrites the AST so that inline `$$...$$` becomes a proper block math node.
 
-The initial implementation visited `inlineMath` nodes directly:
+The implementation was redesigned to operate at the **paragraph level**.
+
+1. visits each paragraph node
+2. scans its children
+3. detects inline `$$...$$`
+4. splits the paragraph into multiple blocks
+
+For example:
 
 ```
-visitParents(tree, "inlineMath")
+text $$x^2$$ text
 ```
 
-When a `$$...$$` expression was detected, the plugin split the surrounding paragraph and inserted a `math` block.
+becomes:
 
-This worked for simple cases but had a fundamental issue:
-the AST was being mutated while the traversal was still in progress.
+```
+paragraph("text")
 
-That approach could lead to traversal inconsistencies when multiple math nodes appeared in the same paragraph.
+math("x^2")
+
+paragraph("text")
+```
 
 ## License
 
