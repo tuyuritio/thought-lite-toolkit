@@ -4,6 +4,12 @@ import { SKIP, visit } from "unist-util-visit";
 
 interface Options {
 	enabled?: boolean;
+	/**
+	 * mode: defaults to "displaystyle"
+	 * - "block": keep current behavior, convert inline $$...$$ into block math
+	 * - "displaystyle": keep paragraph structure, rewrite inline $$...$$ as {\displaystyle ...}
+	 */
+	mode?: "block" | "displaystyle";
 }
 
 function normalizeClass(v: unknown): string[] {
@@ -43,6 +49,27 @@ function toDisplayMath(node: InlineMath): ASTMath {
 	};
 }
 
+function toDisplayStyleInlineMath(node: InlineMath): InlineMath {
+	const classNames = normalizeClass(node.data?.hProperties?.className);
+	const nextClassNames = classNames.map(c => (c === "math-inline" ? "math-displaystyle" : c));
+
+	if (!nextClassNames.includes("math-displaystyle")) {
+		nextClassNames.push("math-displaystyle");
+	}
+
+	return {
+		...node,
+		value: `{\\displaystyle ${node.value}}`,
+		data: {
+			...node.data,
+			hProperties: {
+				...node.data?.hProperties,
+				className: nextClassNames
+			}
+		}
+	};
+}
+
 function makeParagraph(children: PhrasingContent[]): Paragraph {
 	return {
 		type: "paragraph",
@@ -60,10 +87,22 @@ function canReplaceParagraphWithBlocks(parent: Parent | undefined): parent is Pa
 }
 
 function remarkInlineDisplayMath(options: Options = {}) {
-	const { enabled = true } = options;
+	const { enabled = true, mode = "displaystyle" } = options;
 
 	return (tree: Root) => {
 		if (!enabled) return;
+
+		if (mode === "displaystyle") {
+			visit(tree, "inlineMath", (node: InlineMath) => {
+				if (!isInlineDisplayMath(node)) return;
+
+				const next = toDisplayStyleInlineMath(node);
+				node.value = next.value;
+				node.data = next.data;
+			});
+
+			return;
+		}
 
 		visit(tree, "paragraph", (paragraph: Paragraph, index, parent) => {
 			if (typeof index !== "number") return;
