@@ -42,9 +42,10 @@ const processor = unified()
 
 ## Options
 
-| Option    | Type      | Default |
-| --------- | --------- | ------- |
-| `enabled` | `boolean` | `true`  |
+| Option    | Type                      | Default        |                                                                      Description                                                                       |
+| --------- | ------------------------- | -------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------: |
+| `enabled` | `boolean`                 | `true`         |                                                                          `-`                                                                           |
+| `mode`    | `block` \| `displaystyle` | `displaystyle` | "block" will convert inline $$...$$ into block math, while "displaystyle" will keep paragraph structure, rewrite inline $$...$$ as {\displaystyle ...} |
 
 ---
 
@@ -84,13 +85,18 @@ text $$x^2$$ text
 
 becomes:
 
-```
-paragraph("text")
+- displaystyle mode:
+  ```
+  paragraph("text" math("\displaystyle x^2") "text")
+  ```
+- block mode:
+  ```
+  paragraph("text")
 
-math("x^2")
+  math("x^2")
 
-paragraph("text")
-```
+  paragraph("text")
+  ```
 
 ## License
 

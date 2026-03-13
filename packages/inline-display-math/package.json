@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/inline-display-math",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Remark plugin that treats inline $$...$$ as display math.",
 	"license": "GPL-3.0-or-later",
 	"author": "KraHsu",

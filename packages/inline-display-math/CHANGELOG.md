@@ -1,5 +1,15 @@
 # @tuyuritio/inline-display-math
 
+## 1.0.2
+
+6713ba7: Add `displaystyle` mode.
+
+### Features
+
+Add a new `mode` option:
+- `block`: preserve current behavior and promote inline `$$...$$` to block math
+- `displaystyle`: keep paragraph structure unchanged and rewrite inline `$$...$$` as `{\displaystyle ...}`
+
 ## 1.0.1
 
 1767229: Complete rewrite of the traversal logic.
