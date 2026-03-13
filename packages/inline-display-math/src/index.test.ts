@@ -73,9 +73,7 @@ describe("remark-inline-display-math", () => {
 	 */
 
 	it("should preserve list hierarchy", async () => {
-		const output = await process(`
-1. before $$x^2$$ after
-`);
+		const output = await process(`\n1. before $$x^2$$ after\n`);
 
 		expect(output).toContain("<ol>");
 		expect(output).toContain("<li>");
@@ -83,18 +81,14 @@ describe("remark-inline-display-math", () => {
 	});
 
 	it("should preserve blockquote hierarchy", async () => {
-		const output = await process(`
-> before $$x^2$$ after
-`);
+		const output = await process(`\n> before $$x^2$$ after\n`);
 
 		expect(output).toContain("<blockquote>");
 		expect(output).toContain("math-display");
 	});
 
 	it("should preserve nested quote + list hierarchy", async () => {
-		const output = await process(`
-> 1. before $$x^2$$ after
-`);
+		const output = await process(`\n> 1. before $$x^2$$ after\n`);
 
 		expect(output).toContain("<blockquote>");
 		expect(output).toContain("<ol>");
@@ -107,11 +101,7 @@ describe("remark-inline-display-math", () => {
 	 */
 
 	it("should handle complex academic example", async () => {
-		const output = await process(`
-1. $\\mathbb{E}[R_{t+1}|S_{t}=s]$:$$\\begin{align}
-a &= b + c
-\\end{align}$$
-`);
+		const output = await process(`\n1. $\\mathbb{E}[R_{t+1}|S_{t}=s]$:$$\\begin{align}\na &= b + c\n\\end{align}$$\n`);
 
 		expect(output).toContain("math-inline");
 		expect(output).toContain("math-display");
