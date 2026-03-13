@@ -36,8 +36,8 @@ function toDisplayMath(node: InlineMath): ASTMath {
 			...node.data,
 			hName: "code",
 			hProperties: {
-				...(node.data as any)?.hProperties,
-				className: normalizeClass((node.data as any)?.hProperties?.className).map(c => (c === "math-inline" ? "math-display" : c))
+				...node.data?.hProperties,
+				className: normalizeClass(node.data?.hProperties?.className).map(c => (c === "math-inline" ? "math-display" : c))
 			}
 		}
 	};
