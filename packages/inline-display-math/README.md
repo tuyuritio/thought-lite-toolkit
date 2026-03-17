@@ -42,10 +42,57 @@ const processor = unified()
 
 ## Options
 
-| Option    | Type                      | Default        |                                                                      Description                                                                       |
-| --------- | ------------------------- | -------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------: |
-| `enabled` | `boolean`                 | `true`         |                                                                          `-`                                                                           |
-| `mode`    | `block` \| `displaystyle` | `displaystyle` | "block" will convert inline $$...$$ into block math, while "displaystyle" will keep paragraph structure, rewrite inline $$...$$ as {\displaystyle ...} |
+| Option   | Type                                                       | Default    | Description |
+| -------- | ---------------------------------------------------------- | ---------- | :---------: |
+| `layout` | `"block"` \| `"display"` \| `"displaystyle"` \| `"inline"` | `"inline"` |     `-`     |
+
+* `"block"`: convert inline `$$...$$` into block math (break paragraph structure)
+* `"display"`: keep the structure, but render with display layout (centers math on its own line)
+* `"displaystyle"`: keep the structure and inline layout, only apply `\displaystyle`
+* `"inline"`: do nothing
+
+For example, with given md:
+```md
+1. single dollar $\sum_{i=0}^n i$ text 
+
+2. double dollar $$\sum_{i=0}^n i$$ text
+
+3. inline env:align $$\begin{align} \sum_{i=0}^n i \end{align}$$ text
+
+4. inline env:aligned $$\begin{aligned} \sum_{i=0}^n i \end{aligned}$$ text
+
+5. block env:align: 
+$$
+\begin{align} \sum_{i=0}^n i \end{align}
+$$
+
+1. block env:aligned:
+$$
+\begin{aligned} \sum_{i=0}^n i \end{aligned}
+$$
+```
+
+1. `block`
+
+![block.png](./docs/images/block.png)
+
+2. `display`
+
+![display.png](./docs/images/display.png)
+
+Error: ParseError: KaTeX parse error: {align} can be used only in display mode.
+
+3. `displaystyle`
+
+![displaystyle.png](./docs/images/displaystyle.png)
+
+Error: ParseError: KaTeX parse error: {align} can be used only in display mode.
+
+4. `inline`
+
+![inline.png](./docs/images/inline.png)
+
+Error: ParseError: KaTeX parse error: {align} can be used only in display mode.
 
 ---
 
@@ -84,12 +131,15 @@ text $$x^2$$ text
 ```
 
 becomes:
-
-- displaystyle mode:
+- displaystyle:
   ```
   paragraph("text" math("\displaystyle x^2") "text")
   ```
-- block mode:
+- display:
+  ```
+  paragraph("text" span[class="katex-display"]( math("\displaystyle x^2") ) "text")
+  ```
+- block:
   ```
   paragraph("text")
 
