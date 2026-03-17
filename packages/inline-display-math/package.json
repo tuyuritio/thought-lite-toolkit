@@ -26,6 +26,7 @@
 	},
 	"devDependencies": {
 		"@types/mdast": "catalog:",
+		"@types/unist": "catalog:",
 		"mdast-util-math": "catalog:",
 		"remark-math": "catalog:",
 		"remark-parse": "catalog:",

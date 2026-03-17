@@ -1,17 +1,29 @@
 import type { Paragraph, Parent, PhrasingContent, Root, RootContent } from "mdast";
 import type { Math as ASTMath, InlineMath } from "mdast-util-math";
+import type { Plugin, Transformer } from "unified";
 import { SKIP, visit } from "unist-util-visit";
 
 interface Options {
 	/**
 	 * layout:
 	 * - "block": convert inline $$...$$ into block math (break paragraph structure)
-	 * - "display": keep structure, but render with display layout
+	 * - "display": keep structure, but render with display layout (centers math on its own line)
 	 * - "displaystyle": keep structure and inline layout, only apply \displaystyle
 	 * - "inline": do nothing
 	 */
 	layout?: "block" | "display" | "displaystyle" | "inline";
 }
+
+type KatexDisplayWarpper = {
+	type: "span";
+	children: [InlineMath];
+	data: {
+		hName: "span";
+		hProperties: {
+			className: ["katex-display"];
+		};
+	};
+};
 
 function normalizeClass(v: unknown): string[] {
 	if (Array.isArray(v)) return v.map(String);
@@ -34,7 +46,7 @@ function isInlineDisplayMath(node: InlineMath): boolean {
 	return srcLen - valLen > 2;
 }
 
-function toDisplayMath(node: InlineMath): ASTMath {
+function toBlockMath(node: InlineMath): ASTMath {
 	return {
 		type: "math",
 		value: node.value,
@@ -50,22 +62,29 @@ function toDisplayMath(node: InlineMath): ASTMath {
 	};
 }
 
-function toDisplayStyleInlineMath(node: InlineMath): InlineMath {
-	const classNames = normalizeClass(node.data?.hProperties?.className);
-	const nextClassNames = classNames.map(c => (c === "math-inline" ? "math-displaystyle" : c));
+function applyDisplayStyle(node: InlineMath): void {
+	const child = node.data?.hChildren?.[0];
 
-	if (!nextClassNames.includes("math-displaystyle")) {
-		nextClassNames.push("math-displaystyle");
+	if (node.data?.hChildren?.length !== 1 || child?.type !== "text") {
+		return;
 	}
 
+	if (!child.value.startsWith("\\displaystyle ")) {
+		child.value = `\\displaystyle ${child.value}`;
+	}
+}
+
+
+function wrapDisplayLayout(node: InlineMath): KatexDisplayWarpper {
+	applyDisplayStyle(node);
+
 	return {
-		...node,
-		value: `{\\displaystyle ${node.value}}`,
+		type: "span",
+		children: [node],
 		data: {
-			...node.data,
+			hName: "span",
 			hProperties: {
-				...node.data?.hProperties,
-				className: nextClassNames
+				className: ["katex-display"]
 			}
 		}
 	};
@@ -87,23 +106,46 @@ function canReplaceParagraphWithBlocks(parent: Parent | undefined): parent is Pa
 	return true;
 }
 
-function remarkInlineDisplayMath(options: Options = {}) {
-	const { enabled = true, layout: mode = "displaystyle" } = options;
+const plugin: Plugin<[Options?], Root> = (options = {}) => {
+	const { layout = "inline" } = options;
+	const transformer: Transformer<Root> = tree => {
+		if (layout === "inline") {
+			return;
+		}
 
-	return (tree: Root) => {
-		if (!enabled) return;
-
-		if (mode === "displaystyle") {
+		if (layout === "displaystyle") {
 			visit(tree, "inlineMath", (node: InlineMath) => {
 				if (!isInlineDisplayMath(node)) return;
 
-				const next = toDisplayStyleInlineMath(node);
-				node.value = next.value;
-				node.data = next.data;
+				applyDisplayStyle(node);
 			});
 
 			return;
 		}
+
+
+		if (layout === "display") {
+			visit(tree, "paragraph", (paragraph: Paragraph) => {
+				const children: PhrasingContent[] = [];
+				let changed = false;
+
+				for (const child of paragraph.children) {
+					if (child.type === "inlineMath" && isInlineDisplayMath(child)) {
+						changed = true;
+						children.push(wrapDisplayLayout(child) as unknown as PhrasingContent);
+					} else {
+						children.push(child);
+					}
+				}
+
+				if (!changed) return;
+
+				paragraph.children = children;
+			});
+
+			return;
+		}
+
 
 		visit(tree, "paragraph", (paragraph: Paragraph, index, parent) => {
 			if (typeof index !== "number") return;
@@ -122,7 +164,7 @@ function remarkInlineDisplayMath(options: Options = {}) {
 						buffer = [];
 					}
 
-					blocks.push(toDisplayMath(child as InlineMath));
+					blocks.push(toBlockMath(child as InlineMath));
 				} else {
 					buffer.push(child);
 				}
@@ -141,7 +183,9 @@ function remarkInlineDisplayMath(options: Options = {}) {
 			// Skip newly inserted nodes to avoid visiting them again.
 			return [SKIP, index + blocks.length];
 		});
-	};
+	}
+
+	return transformer;
 }
 
-export default remarkInlineDisplayMath;
+export default plugin;

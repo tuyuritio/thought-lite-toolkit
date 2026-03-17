@@ -28,28 +28,28 @@ describe("remark-inline-display-math", () => {
 		 */
 
 		it("should keep $...$ as inline math", async () => {
-			const output = await process("test $x^2$ test", { mode: "block" });
+			const output = await process("test $x^2$ test", { layout: "block" });
 
 			expect(output).toContain("math-inline");
 			expect(output).not.toContain("math-display");
 		});
 
 		it("should convert $$...$$ to display math", async () => {
-			const output = await process("test $$x^2$$ test", { mode: "block" });
+			const output = await process("test $$x^2$$ test", { layout: "block" });
 
 			expect(output).toContain("math-display");
 			expect(output.match(/<p>/g)?.length).toBe(2);
 		});
 
 		it("should distinguish $ and $$ correctly", async () => {
-			const output = await process("$x$ $$y$$", { mode: "block" });
+			const output = await process("$x$ $$y$$", { layout: "block" });
 
 			expect(output).toContain("math-inline");
 			expect(output).toContain("math-display");
 		});
 		
 		it("should support multiple display math", async () => {
-			const output = await process("$$a$$ $$b$$ $$c$$", { mode: "block" });
+			const output = await process("$$a$$ $$b$$ $$c$$", { layout: "block" });
 			
 			expect(output.match(/math-display/g)?.length).toBe(3);
 		});
@@ -59,7 +59,7 @@ describe("remark-inline-display-math", () => {
 		 */
 
 		it("should split paragraph around display math", async () => {
-			const output = await process("before $$x^2$$ after", { mode: "block" });
+			const output = await process("before $$x^2$$ after", { layout: "block" });
 
 			expect(output).toContain("before");
 			expect(output).toContain("math-display");
@@ -68,7 +68,7 @@ describe("remark-inline-display-math", () => {
 		});
 
 		it("should preserve punctuation near math", async () => {
-			const output = await process("text $$x^2$$, next", { mode: "block" });
+			const output = await process("text $$x^2$$, next", { layout: "block" });
 
 			expect(output).toContain("math-display");
 			expect(output).toContain(", next");
@@ -80,7 +80,7 @@ describe("remark-inline-display-math", () => {
 		 */
 
 		it("should preserve list hierarchy", async () => {
-			const output = await process(`\n1. before $$x^2$$ after\n`, { mode: "block" });
+			const output = await process(`\n1. before $$x^2$$ after\n`, { layout: "block" });
 
 			expect(output).toContain("<ol>");
 			expect(output).toContain("<li>");
@@ -88,14 +88,14 @@ describe("remark-inline-display-math", () => {
 		});
 
 		it("should preserve blockquote hierarchy", async () => {
-			const output = await process(`\n> before $$x^2$$ after\n`, { mode: "block" });
+			const output = await process(`\n> before $$x^2$$ after\n`, { layout: "block" });
 
 			expect(output).toContain("<blockquote>");
 			expect(output).toContain("math-display");
 		});
 
 		it("should preserve nested quote + list hierarchy", async () => {
-			const output = await process(`\n> 1. before $$x^2$$ after\n`, { mode: "block" });
+			const output = await process(`\n> 1. before $$x^2$$ after\n`, { layout: "block" });
 
 			expect(output).toContain("<blockquote>");
 			expect(output).toContain("<ol>");
@@ -108,7 +108,7 @@ describe("remark-inline-display-math", () => {
 		 */
 
 		it("should handle complex academic example", async () => {
-			const output = await process(`\n1. $\\mathbb{E}[R_{t+1}|S_{t}=s]$:$$\\begin{align}\na &= b + c\n\\end{align}$$\n`, { mode: "block" });
+			const output = await process(`\n1. $\\mathbb{E}[R_{t+1}|S_{t}=s]$:$$\\begin{align}\na &= b + c\n\\end{align}$$\n`, { layout: "block" });
 
 			expect(output).toContain("math-inline");
 			expect(output).toContain("math-display");
