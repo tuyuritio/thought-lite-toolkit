@@ -3,13 +3,14 @@ import type { Math as ASTMath, InlineMath } from "mdast-util-math";
 import { SKIP, visit } from "unist-util-visit";
 
 interface Options {
-	enabled?: boolean;
 	/**
-	 * mode: defaults to "displaystyle"
-	 * - "block": keep current behavior, convert inline $$...$$ into block math
-	 * - "displaystyle": keep paragraph structure, rewrite inline $$...$$ as {\displaystyle ...}
+	 * layout:
+	 * - "block": convert inline $$...$$ into block math (break paragraph structure)
+	 * - "display": keep structure, but render with display layout
+	 * - "displaystyle": keep structure and inline layout, only apply \displaystyle
+	 * - "inline": do nothing
 	 */
-	mode?: "block" | "displaystyle";
+	layout?: "block" | "display" | "displaystyle" | "inline";
 }
 
 function normalizeClass(v: unknown): string[] {
@@ -87,7 +88,7 @@ function canReplaceParagraphWithBlocks(parent: Parent | undefined): parent is Pa
 }
 
 function remarkInlineDisplayMath(options: Options = {}) {
-	const { enabled = true, mode = "displaystyle" } = options;
+	const { enabled = true, layout: mode = "displaystyle" } = options;
 
 	return (tree: Root) => {
 		if (!enabled) return;
