@@ -6,17 +6,18 @@ import { buildClient } from "./providers/index";
 import microsoft from "./providers/microsoft";
 import slack from "./providers/slack";
 import x from "./providers/x";
-import type { Provider, ProviderAdapter, ProviderConfiguration } from "./types";
+import type { Identity, Provider, ProviderAdapter, ProviderConfiguration } from "./types";
 
-const providers = { discord, facebook, github, google, microsoft, slack, x } satisfies Record<string, ProviderAdapter>;
+const adapters = { discord, facebook, github, google, microsoft, slack, x } satisfies Record<string, ProviderAdapter>;
 
-export type ProviderName = keyof typeof providers;
+export type ProviderName = keyof typeof adapters;
+export type IdentityConfiguration = Partial<Record<ProviderName, ProviderConfiguration | undefined>>;
 
 export { OAuthError } from "./error";
 export type {
 	AuthorizationOptions,
+	Identity,
 	PKCETransaction as OAuthTransaction,
-	Provider as OAuthProvider,
 	ProviderConfiguration,
 	Revocation,
 	Tokens as OAuthTokens,
@@ -24,13 +25,60 @@ export type {
 } from "./types";
 
 /**
- * Creates an OAuth client for the specified provider using the provided configuration
- * @param provider - The name of the OAuth provider (e.g., "github", "google", "x")
- * @param configuration - The configuration object containing client ID, client secret, redirect URI, and scopes
- * @returns A promise that resolves to an OAuthProvider instance for the specified provider
- * @throws {TypeError} If the specified provider is not recognized
+ * Creates a configured identity router for the enabled OAuth 2.0 / OpenID Connect providers.
+ * Provider clients are initialized lazily on first use and cached for subsequent requests.
+ * @param configurations - Map of provider names to their client configurations (`undefined` entries are ignored)
+ * @returns An Identity router that dispatches OAuth operations by provider name
+ * @throws {TypeError} If an unknown provider name is supplied in `configurations`
  */
-export async function createClient(provider: ProviderName, configuration: ProviderConfiguration): Promise<Provider> {
-	if (!Object.hasOwn(providers, provider)) throw new TypeError(`Unknown OAuth provider: ${provider}`);
-	return buildClient(configuration, providers[provider]);
+export function createIdentity(configurations: IdentityConfiguration): Identity<ProviderName> {
+	const configs = new Map<ProviderName, ProviderConfiguration>();
+	for (const [name, config] of Object.entries(configurations)) {
+		if (!config) continue;
+		if (!Object.hasOwn(adapters, name)) throw new TypeError(`Unknown OAuth provider: ${name}`);
+		configs.set(name as ProviderName, config);
+	}
+
+	const enabled = Object.freeze([...configs.keys()]);
+	const clients = new Map<ProviderName, Promise<Provider>>();
+
+	function getClient(provider: ProviderName): Promise<Provider> {
+		const config = configs.get(provider);
+		if (!config) throw new TypeError(`Unconfigured OAuth provider: ${provider}`);
+		let client = clients.get(provider);
+		if (!client) {
+			client = buildClient(config, adapters[provider]).catch(error => {
+				clients.delete(provider);
+				throw error;
+			});
+			clients.set(provider, client);
+		}
+		return client;
+	}
+
+	return {
+		providers: enabled,
+		has(provider: string): provider is ProviderName {
+			return configs.has(provider as ProviderName);
+		},
+		async buildAuthorizationRequest(provider, options) {
+			return (await getClient(provider)).buildAuthorizationRequest(options);
+		},
+		async handleAuthorizationResponse(provider, callbackUrl, transaction) {
+			return (await getClient(provider)).handleAuthorizationResponse(callbackUrl, transaction);
+		},
+		async getUserInfo(provider, input) {
+			return (await getClient(provider)).getUserInfo(input);
+		},
+		async refreshAccessToken(provider, refreshToken) {
+			const client = await getClient(provider);
+			if (!client.refreshAccessToken) throw new TypeError(`Provider "${provider}" does not support token refresh`);
+			return client.refreshAccessToken(refreshToken);
+		},
+		async revokeToken(provider, input) {
+			const client = await getClient(provider);
+			if (!client.revokeToken) throw new TypeError(`Provider "${provider}" does not support token revocation`);
+			return client.revokeToken(input);
+		}
+	};
 }

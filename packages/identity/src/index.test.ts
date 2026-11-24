@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createClient, OAuthError, type ProviderConfiguration } from ".";
+import { createIdentity, OAuthError, type ProviderConfiguration } from ".";
 
 const config = {
 	clientID: "example-client",
@@ -23,7 +23,28 @@ function stubFetch(respond: (request: Request) => Response | Promise<Response>) 
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("OAuth providers", () => {
+describe("createIdentity", () => {
+	it("exposes enabled providers, ignores undefined entries, and lazily caches OIDC discovery", async () => {
+		const fetch = stubFetch(request => {
+			if (request.url === "https://accounts.google.com/.well-known/openid-configuration") return googleDiscovery();
+			throw new Error(`Unexpected request: ${request.url}`);
+		});
+
+		const identity = createIdentity({ github: config, google: { ...config, scopes: ["profile"] }, x: undefined });
+		expect(identity.providers).toEqual(["github", "google"]);
+		expect(identity.has("github")).toBe(true);
+		expect(identity.has("google")).toBe(true);
+		expect(identity.has("x")).toBe(false);
+		expect(identity.has("unknown")).toBe(false);
+		expect(fetch).not.toHaveBeenCalled();
+
+		await identity.buildAuthorizationRequest("google");
+		await identity.buildAuthorizationRequest("google");
+		expect(fetch).toHaveBeenCalledOnce();
+
+		await expect(identity.buildAuthorizationRequest("x")).rejects.toThrow("Unconfigured OAuth provider: x");
+	});
+
 	it("completes a GitHub login and returns the normalized account and credentials", async () => {
 		const fetch = stubFetch(async request => {
 			switch (request.url) {
@@ -43,31 +64,31 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("github", config);
-		const { url, transaction } = await provider.buildAuthorizationRequest({ parameters: { allow_signup: false } });
+		const identity = createIdentity({ github: config });
+		const { url, transaction } = await identity.buildAuthorizationRequest("github", { parameters: { allow_signup: false } });
 		expect(url.searchParams.get("state")).toBe(transaction.state);
 		expect(url.searchParams.get("code_challenge_method")).toBe("S256");
 		expect(url.searchParams.get("code_challenge")).toMatch(/^[A-Za-z0-9_-]{43}$/);
 		expect(url.searchParams.get("allow_signup")).toBe("false");
 
-		const result = await provider.handleAuthorizationResponse(callback(transaction.state), JSON.parse(JSON.stringify(transaction)));
+		const result = await identity.handleAuthorizationResponse("github", callback(transaction.state), JSON.parse(JSON.stringify(transaction)));
 		expect(fetch).toHaveBeenCalledTimes(2);
 		expect(result.userInfo).toMatchObject({ sub: "42", name: "octocat", preferred_username: "octocat" });
 		expect(result.userInfo.email).toBeUndefined();
 		expect(result.tokens).toMatchObject({ accessToken: "github-token" });
-		expect(provider.refreshAccessToken).toBeUndefined();
+		await expect(identity.refreshAccessToken("github", "token")).rejects.toThrow(TypeError);
 	});
 
 	it("forwards additional provider authorization parameters", async () => {
-		const provider = await createClient("github", config);
-		const { url } = await provider.buildAuthorizationRequest({ parameters: { provider_option: "custom value" } });
+		const identity = createIdentity({ github: config });
+		const { url } = await identity.buildAuthorizationRequest("github", { parameters: { provider_option: "custom value" } });
 
 		expect(url.searchParams.get("provider_option")).toBe("custom value");
 	});
 
 	it("does not allow custom parameters to override protocol parameters", async () => {
-		const provider = await createClient("github", config);
-		const { url, transaction } = await provider.buildAuthorizationRequest({
+		const identity = createIdentity({ github: config });
+		const { url, transaction } = await identity.buildAuthorizationRequest("github", {
 			parameters: { redirect_uri: "https://evil.example", scope: "admin", state: "forged" }
 		});
 
@@ -80,28 +101,28 @@ describe("OAuth providers", () => {
 		const fetch = stubFetch(() => {
 			throw new Error("Invalid callbacks should never use the network");
 		});
-		const provider = await createClient("github", config);
-		const { transaction } = await provider.buildAuthorizationRequest();
+		const identity = createIdentity({ github: config });
+		const { transaction } = await identity.buildAuthorizationRequest("github");
 
 		const wrongOrigin = callback(transaction.state);
 		wrongOrigin.hostname = "other.example";
 		const wrongPath = callback(transaction.state);
 		wrongPath.pathname = "/other";
 
-		await expect(provider.handleAuthorizationResponse(wrongOrigin, transaction)).rejects.toMatchObject({ code: "invalid_callback" });
-		await expect(provider.handleAuthorizationResponse(wrongPath, transaction)).rejects.toMatchObject({ code: "invalid_callback" });
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), { ...transaction, codeVerifier: "" })).rejects.toMatchObject({
-			code: "invalid_transaction"
-		});
-		await expect(provider.handleAuthorizationResponse(callback("wrong-state"), transaction)).rejects.toThrow();
+		await expect(identity.handleAuthorizationResponse("github", wrongOrigin, transaction)).rejects.toMatchObject({ code: "invalid_callback" });
+		await expect(identity.handleAuthorizationResponse("github", wrongPath, transaction)).rejects.toMatchObject({ code: "invalid_callback" });
+		await expect(
+			identity.handleAuthorizationResponse("github", callback(transaction.state), { ...transaction, codeVerifier: "" })
+		).rejects.toMatchObject({ code: "invalid_transaction" });
+		await expect(identity.handleAuthorizationResponse("github", callback("wrong-state"), transaction)).rejects.toThrow();
 		expect(fetch).not.toHaveBeenCalled();
 	});
 
 	it("rejects profile synchronization when the account subject differs", async () => {
 		stubFetch(() => Response.json({ id: 42 }));
-		const provider = await createClient("github", config);
+		const identity = createIdentity({ github: config });
 
-		await expect(provider.getUserInfo({ accessToken: "example-token", expectedSubject: "43" })).rejects.toMatchObject({
+		await expect(identity.getUserInfo("github", { accessToken: "example-token", expectedSubject: "43" })).rejects.toMatchObject({
 			code: "subject_mismatch"
 		});
 	});
@@ -114,8 +135,8 @@ describe("OAuth providers", () => {
 			return new Response(null, { status: 403 });
 		});
 
-		const provider = await createClient("github", config);
-		await expect(provider.revokeToken?.({ type: "access_token", token: "example-token" })).rejects.toMatchObject({
+		const identity = createIdentity({ github: config });
+		await expect(identity.revokeToken("github", { type: "access_token", token: "example-token" })).rejects.toMatchObject({
 			code: "revocation_failed"
 		});
 		expect(fetch).toHaveBeenCalledOnce();
@@ -151,14 +172,14 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("google", { ...config, scopes: ["email"] });
-		const { url, transaction } = await provider.buildAuthorizationRequest({ parameters: { login_hint: "user@example.com" } });
+		const identity = createIdentity({ google: { ...config, scopes: ["email"] } });
+		const { url, transaction } = await identity.buildAuthorizationRequest("google", { parameters: { login_hint: "user@example.com" } });
 		expect(url.searchParams.get("scope")).toBe("openid email");
 		expect(url.searchParams.get("login_hint")).toBe("user@example.com");
 		expect(url.searchParams.get("nonce")).toBe(transaction.nonce);
 		expect(transaction.nonce).toBeTruthy();
 		nonce = transaction.nonce!;
-		const complete = () => provider.handleAuthorizationResponse(callback(transaction.state), transaction);
+		const complete = () => identity.handleAuthorizationResponse("google", callback(transaction.state), transaction);
 
 		await expect(complete()).resolves.toMatchObject({
 			userInfo: { sub: subject, name: "Example User" },
@@ -170,9 +191,9 @@ describe("OAuth providers", () => {
 		nonce = "different-nonce";
 		await expect(complete()).rejects.toThrow();
 		expect(fetch).toHaveBeenCalledOnce();
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), { ...transaction, nonce: undefined })).rejects.toBeInstanceOf(
-			OAuthError
-		);
+		await expect(
+			identity.handleAuthorizationResponse("google", callback(transaction.state), { ...transaction, nonce: undefined })
+		).rejects.toBeInstanceOf(OAuthError);
 		expect(fetch).toHaveBeenCalledOnce();
 	});
 
@@ -198,11 +219,13 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("google", config);
-		const tokens = await provider.refreshAccessToken?.("old-refresh");
+		const identity = createIdentity({ google: config });
+		const tokens = await identity.refreshAccessToken("google", "old-refresh");
 		expect(tokens).toMatchObject({ accessToken: "new-access", refreshToken: "new-refresh", expiresAt: expect.any(Number) });
-		expect(tokens?.expiresAt).toBeGreaterThan(Date.now());
-		await expect(provider.revokeToken?.({ type: "refresh_token", token: "new-refresh" })).rejects.toMatchObject({ error: "invalid_token" });
+		expect(tokens.expiresAt).toBeGreaterThan(Date.now());
+		await expect(identity.revokeToken("google", { type: "refresh_token", token: "new-refresh" })).rejects.toMatchObject({
+			error: "invalid_token"
+		});
 	});
 
 	it("uses HTTP Basic authentication for X token exchange and revocation", async () => {
@@ -228,13 +251,13 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("x", config);
-		const { transaction } = await provider.buildAuthorizationRequest();
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), transaction)).resolves.toMatchObject({
+		const identity = createIdentity({ x: config });
+		const { transaction } = await identity.buildAuthorizationRequest("x");
+		await expect(identity.handleAuthorizationResponse("x", callback(transaction.state), transaction)).resolves.toMatchObject({
 			userInfo: { sub: "42", preferred_username: "example" },
 			tokens: { accessToken: "x-token", refreshToken: "x-refresh" }
 		});
-		await expect(provider.revokeToken?.({ type: "refresh_token", token: "x-refresh" })).resolves.toBeUndefined();
+		await expect(identity.revokeToken("x", { type: "refresh_token", token: "x-refresh" })).resolves.toBeUndefined();
 	});
 
 	it("completes Discord login, refresh, and revocation", async () => {
@@ -266,9 +289,9 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("discord", { ...config, scopes: ["identify", "email"] });
-		const { transaction } = await provider.buildAuthorizationRequest();
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), transaction)).resolves.toMatchObject({
+		const identity = createIdentity({ discord: { ...config, scopes: ["identify", "email"] } });
+		const { transaction } = await identity.buildAuthorizationRequest("discord");
+		await expect(identity.handleAuthorizationResponse("discord", callback(transaction.state), transaction)).resolves.toMatchObject({
 			userInfo: {
 				sub: "99",
 				name: "Wumpus",
@@ -278,11 +301,11 @@ describe("OAuth providers", () => {
 			},
 			tokens: { accessToken: "discord-token", refreshToken: "discord-refresh" }
 		});
-		await expect(provider.refreshAccessToken?.("discord-refresh")).resolves.toMatchObject({
+		await expect(identity.refreshAccessToken("discord", "discord-refresh")).resolves.toMatchObject({
 			accessToken: "discord-new",
 			refreshToken: "discord-refresh-2"
 		});
-		await expect(provider.revokeToken?.({ type: "access_token", token: "discord-new" })).resolves.toBeUndefined();
+		await expect(identity.revokeToken("discord", { type: "access_token", token: "discord-new" })).resolves.toBeUndefined();
 	});
 
 	it("completes Facebook login and extracts nested picture URL", async () => {
@@ -303,14 +326,14 @@ describe("OAuth providers", () => {
 			throw new Error(`Unexpected request: ${request.url}`);
 		});
 
-		const provider = await createClient("facebook", { ...config, scopes: ["public_profile", "email"] });
-		const { transaction } = await provider.buildAuthorizationRequest();
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), transaction)).resolves.toMatchObject({
+		const identity = createIdentity({ facebook: { ...config, scopes: ["public_profile", "email"] } });
+		const { transaction } = await identity.buildAuthorizationRequest("facebook");
+		await expect(identity.handleAuthorizationResponse("facebook", callback(transaction.state), transaction)).resolves.toMatchObject({
 			userInfo: { sub: "101", name: "FB User", picture: "https://cdn.facebook.example/avatar.jpg", email: "fb@example.com" },
 			tokens: { accessToken: "fb-token" }
 		});
-		expect(provider.refreshAccessToken).toBeUndefined();
-		expect(provider.revokeToken).toBeUndefined();
+		await expect(identity.refreshAccessToken("facebook", "token")).rejects.toThrow(TypeError);
+		await expect(identity.revokeToken("facebook", { type: "access_token", token: "fb-token" })).rejects.toThrow(TypeError);
 	});
 
 	it("completes Microsoft multi-tenant OIDC login and token refresh", async () => {
@@ -357,15 +380,18 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("microsoft", { ...config, scopes: ["profile", "email", "offline_access"] });
-		const { transaction } = await provider.buildAuthorizationRequest();
+		const identity = createIdentity({ microsoft: { ...config, scopes: ["profile", "email", "offline_access"] } });
+		const { transaction } = await identity.buildAuthorizationRequest("microsoft");
 		nonce = transaction.nonce!;
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), transaction)).resolves.toMatchObject({
+		await expect(identity.handleAuthorizationResponse("microsoft", callback(transaction.state), transaction)).resolves.toMatchObject({
 			userInfo: { sub: "ms-user", name: "MS User", email: "ms@example.com" },
 			tokens: { accessToken: "ms-token", refreshToken: "ms-refresh" }
 		});
-		await expect(provider.refreshAccessToken?.("ms-refresh")).resolves.toMatchObject({ accessToken: "ms-new", refreshToken: "ms-refresh-2" });
-		expect(provider.revokeToken).toBeUndefined();
+		await expect(identity.refreshAccessToken("microsoft", "ms-refresh")).resolves.toMatchObject({
+			accessToken: "ms-new",
+			refreshToken: "ms-refresh-2"
+		});
+		await expect(identity.revokeToken("microsoft", { type: "access_token", token: "ms-token" })).rejects.toThrow(TypeError);
 	});
 
 	it("completes Slack OIDC login and handles auth.revoke errors", async () => {
@@ -415,14 +441,16 @@ describe("OAuth providers", () => {
 			}
 		});
 
-		const provider = await createClient("slack", { ...config, scopes: ["profile", "email"] });
-		const { transaction } = await provider.buildAuthorizationRequest();
+		const identity = createIdentity({ slack: { ...config, scopes: ["profile", "email"] } });
+		const { transaction } = await identity.buildAuthorizationRequest("slack");
 		nonce = transaction.nonce!;
-		await expect(provider.handleAuthorizationResponse(callback(transaction.state), transaction)).resolves.toMatchObject({
+		await expect(identity.handleAuthorizationResponse("slack", callback(transaction.state), transaction)).resolves.toMatchObject({
 			userInfo: { sub: "U0R7JM", name: "Slack User", email: "slack@example.com", picture: "https://slack.example/a.png" },
 			tokens: { accessToken: "xoxp-slack" }
 		});
-		await expect(provider.revokeToken?.({ type: "access_token", token: "xoxp-slack" })).rejects.toMatchObject({ code: "revocation_failed" });
+		await expect(identity.revokeToken("slack", { type: "access_token", token: "xoxp-slack" })).rejects.toMatchObject({
+			code: "revocation_failed"
+		});
 	});
 });
 

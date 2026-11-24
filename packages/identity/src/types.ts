@@ -47,6 +47,16 @@ export interface Provider {
 	revokeToken?(input: Revocation): Promise<void>;
 }
 
+export interface Identity<Name extends string = string> {
+	readonly providers: readonly Name[];
+	has(provider: string): provider is Name;
+	buildAuthorizationRequest(provider: Name, options?: AuthorizationOptions): Promise<{ url: URL; transaction: PKCETransaction }>;
+	handleAuthorizationResponse(provider: Name, callbackUrl: URL, transaction: PKCETransaction): Promise<{ userInfo: UserInfo; tokens: Tokens }>;
+	getUserInfo(provider: Name, input: { accessToken: string; expectedSubject: string }): Promise<UserInfo>;
+	refreshAccessToken(provider: Name, refreshToken: string): Promise<Tokens>;
+	revokeToken(provider: Name, input: Revocation): Promise<void>;
+}
+
 export type ProviderAdapter = {
 	clientAuth?: oidc.ClientAuth;
 	refresh?: boolean;

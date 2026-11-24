@@ -33,6 +33,14 @@ Packages are versioned and published via [Changesets](https://github.com/changes
 2. Commit the generated `.changeset/*.md` file and push to `main`.
 3. Merge the automatically opened **Version Packages** pull request to publish to npm with provenance and create release tags.
 
+### First-time publish for a new package
+
+npm Trusted Publishing (OIDC) can only be configured on an existing package. Before releasing a brand-new package:
+
+1. Publish a `0.0.0` placeholder locally (`npm login`, then `cd packages/<name> && pnpm publish --no-git-checks`).
+2. Open `https://www.npmjs.com/package/<package-name>/access` and configure GitHub Actions Trusted Publisher for this repository (`release.yaml`).
+3. Follow the standard Changesets release steps above to publish the first real version with provenance.
+
 ## License
 
 [GPL-3.0](LICENSE)
