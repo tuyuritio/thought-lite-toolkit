@@ -1,6 +1,6 @@
 {
 	"name": "@tuyuritio/identity",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "OAuth2 and OpenID Connect client library.",
 	"license": "GPL-3.0-or-later",
 	"author": "tuyuritio",
@@ -19,7 +19,9 @@
 			"import": "./dist/index.js"
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
