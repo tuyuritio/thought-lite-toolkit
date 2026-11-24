@@ -1,0 +1,37 @@
+{
+	"name": "@tuyuritio/identity",
+	"version": "0.0.0",
+	"description": "OAuth2 and OpenID Connect client library.",
+	"license": "GPL-3.0-or-later",
+	"author": "tuyuritio",
+	"homepage": "https://github.com/tuyuritio/thought-lite-toolkit/tree/main/packages/identity#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tuyuritio/thought-lite-toolkit",
+		"directory": "packages/identity"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"files": ["dist"],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"build": "tsup src/index.ts --format esm --dts",
+		"prepublishOnly": "pnpm test && pnpm build"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:"
+	},
+	"dependencies": {
+		"openid-client": "^6.8.2"
+	}
+}

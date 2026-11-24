@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/tuyuritio/thought-lite-toolkit"
   },
-  "packageManager": "pnpm@10.30.0",
+  "packageManager": "pnpm@12.23.0",
   "scripts": {
     "dev": "vitest",
     "lint": "biome check .",
