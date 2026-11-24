@@ -6,7 +6,7 @@ const userAgent = "thought-lite-toolkit";
 
 export default {
 	server: {
-		issuer: "https://github.com",
+		issuer: "https://github.com/login/oauth",
 		authorization_endpoint: "https://github.com/login/oauth/authorize",
 		token_endpoint: "https://github.com/login/oauth/access_token"
 	},

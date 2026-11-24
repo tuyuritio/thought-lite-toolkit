@@ -71,7 +71,9 @@ describe("createIdentity", () => {
 		expect(url.searchParams.get("code_challenge")).toMatch(/^[A-Za-z0-9_-]{43}$/);
 		expect(url.searchParams.get("allow_signup")).toBe("false");
 
-		const result = await identity.handleAuthorizationResponse("github", callback(transaction.state), JSON.parse(JSON.stringify(transaction)));
+		const githubCallback = callback(transaction.state);
+		githubCallback.searchParams.set("iss", "https://github.com/login/oauth");
+		const result = await identity.handleAuthorizationResponse("github", githubCallback, JSON.parse(JSON.stringify(transaction)));
 		expect(fetch).toHaveBeenCalledTimes(2);
 		expect(result.userInfo).toMatchObject({ sub: "42", name: "octocat", preferred_username: "octocat" });
 		expect(result.userInfo.email).toBeUndefined();
